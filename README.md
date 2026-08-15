@@ -1,10 +1,17 @@
-# devdash
+# simplx-toolkit
+
+Two Go/Bubbletea TUIs sharing terminal-process primitives (PTY, tmux backend, log buffering):
+
+- **[devdash](#devdash)** — dashboard for launching, monitoring, and managing local dev processes.
+- **[maomao](#maomao--multi-repo-agent-orchestrator)** — multi-repo AI-agent orchestrator (tmux sessions, git worktrees, shared context).
+
+![Go](https://img.shields.io/badge/Go-1.25-blue) ![License](https://img.shields.io/badge/license-MIT-green)
+
+## devdash
 
 TUI dashboard for launching, monitoring, and managing local dev processes. Built with [Bubbletea](https://github.com/charmbracelet/bubbletea).
 
 Processes run in the background and persist after quitting — re-running `devdash` reconnects to them automatically.
-
-![Go](https://img.shields.io/badge/Go-1.25-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## Install
 
@@ -442,6 +449,38 @@ migrated automatically and transparently to `~/.config/devdash/` (config,
 `sessions/`, `logs/`) the first time any devdash command runs after
 upgrading — no manual steps, and already-running processes stay
 reconnectable.
+
+## maomao — multi-repo agent orchestrator
+
+TUI for running AI coding agents across multiple git repositories from one
+screen: launches a tmux session per agent, manages git worktrees + branch
+naming, and shares context between agents through a lead panel. Two modes —
+**supervised** (lead confirms each action with you) and **autonomous** (lead
+delegates and streams progress). Design notes in
+[`docs/maomao-design.md`](docs/maomao-design.md).
+
+```bash
+go install github.com/kimaguri/simplx-toolkit/cmd/maomao@latest
+# or: brew install kimaguri/simplx-toolkit/maomao
+```
+
+```bash
+maomao task "description"   # create a task, launch TUI
+maomao list                 # list all tasks
+maomao resume <task-id>     # resume an existing task
+maomao agents                # list available agents
+maomao logs                 # view recent event log
+maomao stats [task-id]      # time-tracking stats (idle detection, per-session)
+maomao init                 # initialize maomao config for current project
+maomao version
+```
+
+Backed by a **tmux session backend** for scrollback/resize correctness (falls
+back to PTY+VTerm when tmux isn't available), **lifecycle hooks**
+(`on_task_create/open/park`, `on_agent_start/stop`, `pre_merge`), **session
+persistence** (crash recovery reconnects panes, restores last task on
+restart), and a **session summary** written to `.maomao/session-summary.md`
+(git diff + last output) when an agent stops.
 
 ## Development
 
